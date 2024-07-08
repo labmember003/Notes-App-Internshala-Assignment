@@ -1,6 +1,7 @@
 package com.falcon.notesapp.login
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -13,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.falcon.notesapp.R
 import com.falcon.notesapp.databinding.FragmentSignUpBinding
 import com.falcon.notesapp.utils.TokenManager
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -41,6 +43,8 @@ class SignUpFragment : Fragment() {
         binding.authGoogle.setOnClickListener {
             if (isNetworkAvailable(requireContext())) {
                 initiateLogin(workAfterLogin())
+            } else {
+                showSnackBar("Login Failed. Check Your Internet Connection", activity)
             }
         }
     }
@@ -66,5 +70,14 @@ class SignUpFragment : Fragment() {
         val networkCapabilities =
             connectivityManager.getNetworkCapabilities(network) ?: return false
         return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    private fun showSnackBar(message: String?, activity: Activity?) {
+        if (null != activity && null != message) {
+            Snackbar.make(
+                activity.findViewById(android.R.id.content),
+                message, Snackbar.LENGTH_SHORT
+            ).show()
+        }
     }
 }

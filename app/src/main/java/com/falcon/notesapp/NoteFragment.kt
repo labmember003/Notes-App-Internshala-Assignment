@@ -1,10 +1,6 @@
 package com.falcon.notesapp
 
-import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +13,6 @@ import com.falcon.notesapp.dao.NoteEntity
 import com.falcon.notesapp.databinding.FragmentNoteBinding
 import com.falcon.notesapp.models.NoteRequest
 import com.falcon.notesapp.models.NoteResponse
-import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -28,9 +23,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class NoteFragment : Fragment() {
-
-    @Inject
-    lateinit var tokenManager: TokenManager
 
     @Inject
     lateinit var noteDatabase: NoteDatabase
@@ -95,15 +87,6 @@ class NoteFragment : Fragment() {
         }
     }
 
-    private fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return false
-        val networkCapabilities =
-            connectivityManager.getNetworkCapabilities(network) ?: return false
-        return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    }
-
     private suspend fun updateNoteInDatabase(existingNote: NoteResponse?, noteRequest: NoteRequest) {
         val noteEntity = NoteEntity(existingNote!!.__v, existingNote._id, existingNote.createdAt,
                 description = noteRequest.description,
@@ -114,7 +97,7 @@ class NoteFragment : Fragment() {
     }
 
     private suspend fun storeNoteInDatabase(noteRequest: NoteRequest) {
-        val noteEntity = NoteEntity(0, "toBeUpdated", "toBeUpdated", noteRequest.description, noteRequest.title, "toBeUpdated", tokenManager.getToken().toString(),
+        val noteEntity = NoteEntity(0, "toBeUpdated", "toBeUpdated", noteRequest.description, noteRequest.title, "toBeUpdated", "abc",
             isSynced = false,
             isDeleted = false
         )
@@ -169,14 +152,5 @@ class NoteFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun showSnackBar(message: String?, activity: Activity?) {
-        if (null != activity && null != message) {
-            Snackbar.make(
-                activity.findViewById(android.R.id.content),
-                message, Snackbar.LENGTH_SHORT
-            ).show()
-        }
     }
 }
