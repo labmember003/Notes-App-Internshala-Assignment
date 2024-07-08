@@ -31,7 +31,7 @@ class SignUpFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSignUpBinding.inflate(inflater, container, false)
-        if (tokenManager.doesUserExist()) { // IF ALREADY USER CREATED DIRECTLY REDIRECT HER TO MAINFRAGMENT
+        if (tokenManager.doesUserExist()) { // IF ALREADY USER CREATED DIRECTLY REDIRECT HER TO MAIN FRAGMENT
             findNavController().navigate(R.id.action_SignUpFragment_to_mainFragment)
         }
         return binding.root
@@ -41,10 +41,16 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.authGoogle.setOnClickListener {
+            binding.continueWithGoogleLL.visibility = View.GONE
+            binding.animationView.visibility = View.VISIBLE
+            binding.animationView.setAnimation("loading-dots.json")
+            binding.animationView.playAnimation()
             if (isNetworkAvailable(requireContext())) {
                 initiateLogin(workAfterLogin())
             } else {
                 showSnackBar("Login Failed. Check Your Internet Connection", activity)
+                binding.continueWithGoogleLL.visibility = View.VISIBLE
+                binding.animationView.visibility = View.GONE
             }
         }
     }
