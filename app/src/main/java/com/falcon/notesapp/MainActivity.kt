@@ -32,8 +32,8 @@ class MainActivity : AppCompatActivity() {
 //        setupActionBarWithNavController(navController, appBarConfiguration)
 //        This line is responsible for the back and the menu button in toolbar
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if(destination.id == R.id.LoginFragment || destination.id == R.id.SignUpFragment
-                || destination.id == R.id.firstFragment  || destination.id == R.id.noteFragment
+            if(destination.id == R.id.SignUpFragment || destination.id == R.id.firstFragment
+                || destination.id == R.id.noteFragment
                 ) {
                 binding.toolbar.visibility = View.GONE
                 binding.fab.visibility = View.GONE

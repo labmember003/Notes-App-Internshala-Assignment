@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.falcon.notesapp.dao.NoteDatabase
+import com.falcon.notesapp.utils.TokenManager
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +24,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
     @Inject
     lateinit var noteDatabase: NoteDatabase
 
+    @Inject
+    lateinit var tokenManager: TokenManager
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
         val preferenceContact = preferenceManager.findPreference<Preference>("contact")
@@ -55,6 +58,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             CoroutineScope(Dispatchers.IO).launch {
                 noteDatabase.clearAllTables()
             }
+            tokenManager.deleteUserExistance()
             findNavController().navigate(R.id.action_settingsFragment2_to_firstFragment)
         }
         dialogBuilder.setNegativeButton("Cancel") { dialog, which ->

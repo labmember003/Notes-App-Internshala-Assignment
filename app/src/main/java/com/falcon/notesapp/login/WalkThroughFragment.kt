@@ -18,7 +18,9 @@ import com.falcon.notesapp.R
 import com.falcon.notesapp.adapters.OnBoardingItemAdapter
 import com.falcon.notesapp.databinding.FragmentWalkThroughBinding
 import com.falcon.notesapp.models.OnBoardingItem
+import com.falcon.notesapp.utils.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class WalkThroughFragment : Fragment() {
@@ -28,6 +30,8 @@ class WalkThroughFragment : Fragment() {
     private lateinit var onBoardingItemAdapter: OnBoardingItemAdapter
     private lateinit var indicatorsContainer: LinearLayout
 
+    @Inject
+    lateinit var tokenManager: TokenManager
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,8 +41,9 @@ class WalkThroughFragment : Fragment() {
         setOnboardingItem()
         setUpIndicators()
         setCurrentIndicator(0)
-        // TODO (IF ALREADY USER CREATED (CHECK THROUGH SHARED PREF OR SO) AND SIGNOUT KE TIME SHAREDPREFF SE HTANA BHI HAI
-//        findNavController().navigate(R.id.action_firstFragment_to_mainFragment)
+        if (tokenManager.doesUserExist()) { // IF ALREADY USER CREATED DIRECTLY REDIRECT HER TO MAINFRAGMENT
+            findNavController().navigate(R.id.action_SignUpFragment_to_mainFragment)
+        }
         return binding.root
 
     }
