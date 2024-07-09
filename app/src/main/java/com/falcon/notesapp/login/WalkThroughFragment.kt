@@ -42,7 +42,7 @@ class WalkThroughFragment : Fragment() {
         setUpIndicators()
         setCurrentIndicator(0)
         if (tokenManager.doesUserExist()) { // IF ALREADY USER CREATED DIRECTLY REDIRECT HER TO MAINFRAGMENT
-            findNavController().navigate(R.id.action_SignUpFragment_to_mainFragment)
+            findNavController().navigate(R.id.action_firstFragment_to_mainFragment)
         }
         return binding.root
 

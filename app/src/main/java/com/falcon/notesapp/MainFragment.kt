@@ -55,7 +55,7 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 //        isNetworkAvailable(requireContext())
-        TODO("NAVGRAPH MEI FIRST FRAGMENT KO RENAME KRKE WALKTHROUGH FRAGMENT KR DIYO KL")
+//        TODO("NAVGRAPH MEI FIRST FRAGMENT KO RENAME KRKE WALKTHROUGH FRAGMENT KR DIYO KL")
         binding.notesList.adapter = adapter
         binding.notesList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.addNote.setOnClickListener {
