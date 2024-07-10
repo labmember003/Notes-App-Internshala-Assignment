@@ -5,10 +5,14 @@ package com.falcon.notesapp.login
 //import com.google.android.gms.auth.api.identity.SignInClient
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.Intent
+import android.content.IntentSender
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,12 +21,19 @@ import androidx.navigation.fragment.findNavController
 import com.falcon.notesapp.R
 import com.falcon.notesapp.databinding.FragmentSignUpBinding
 import com.falcon.notesapp.utils.TokenManager
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.common.api.ApiException
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class SignUpFragment : Fragment() {
+
+    private lateinit var oneTapClient: SignInClient
+    private lateinit var signUpRequest: BeginSignInRequest
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
@@ -37,20 +48,31 @@ class SignUpFragment : Fragment() {
         if (tokenManager.doesUserExist()) { // IF ALREADY USER CREATED DIRECTLY REDIRECT HER TO MAIN FRAGMENT
             findNavController().navigate(R.id.action_SignUpFragment_to_mainFragment)
         }
+
+        oneTapClient = Identity.getSignInClient(requireContext())
+        signUpRequest = BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    // Your server's client ID, not your Android client ID.
+                    .setServerClientId(getString(R.string.your_web_client_id))
+                    // Show all accounts on the device.
+                    .setFilterByAuthorizedAccounts(false)
+                    .build())
+            .build()
         return binding.root
     }
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        oneTapClient = Identity.getSignInClient(requireActivity())
         binding.authGoogle.setOnClickListener {
             binding.continueWithGoogleLL.visibility = View.GONE
             binding.animationView.visibility = View.VISIBLE
             binding.animationView.setAnimation("loading-dots.json")
             binding.animationView.playAnimation()
             if (isNetworkAvailable(requireContext())) {
-//                initiateLogin()
+                initiateLogin()
             } else {
                 showSnackBar("Login Failed. Check Your Internet Connection", activity)
                 binding.continueWithGoogleLL.visibility = View.VISIBLE
@@ -59,50 +81,26 @@ class SignUpFragment : Fragment() {
         }
     }
 
-//    private fun initiateLogin() {
-//        val request: GetCredentialRequest = Builder()
-//            .addCredentialOption(googleIdOption)
-//            .build()
-//
-//        coroutineScope.launch {
-//            try {
-//                val result = credentialManager.getCredential(
-//                    request = request,
-//                    context = activityContext,
-//                )
-//                handleSignIn(result)
-//            } catch (e: GetCredentialException) {
-//                handleFailure(e)
-//            }
-//        }
-//        val signInRequest = BeginSignInRequest.builder()
-//            .setGoogleIdTokenRequestOptions(
-//                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-//                    .setSupported(true)
-//                    .setServerClientId(getString(R.string.your_web_client_id)) // Replace with your client ID
-//                    .setFilterByAuthorizedAccounts(false)
-//                    .build()
-//            )
-//            .setAutoSelectEnabled(true)
-//            .build()
-//
-//        oneTapClient.beginSignIn(signInRequest)
-//            .addOnSuccessListener { result ->
-//                try {
-//                    startIntentSenderForResult(
-//                        result.pendingIntent.intentSender, REQ_ONE_TAP, null, 0, 0, 0, null
-//                    )
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                    showSnackBar("Login Failed: ${e.localizedMessage}", activity)
-//                }
-//            }
-//            .addOnFailureListener { e ->
-//                e.printStackTrace()
-//                showSnackBar("Login Failed: ${e.localizedMessage}", activity)
-//            }
-//        workAfterLogin()
-//    }
+    private fun initiateLogin() {
+        googleLogin()
+    }
+
+    private fun googleLogin() {
+        oneTapClient.beginSignIn(signUpRequest)
+            .addOnSuccessListener(requireActivity()) { result ->
+                try {
+                    startIntentSenderForResult(
+                        result.pendingIntent.intentSender, REQ_ONE_TAP,
+                        null, 0, 0, 0, null)
+                } catch (e: IntentSender.SendIntentException) {
+                    Log.e(TAG, "Couldn't start One Tap UI: ${e.localizedMessage}")
+                }
+            }
+            .addOnFailureListener(requireActivity()) { e ->
+                // No Google Accounts found. Just continue presenting the signed-out UI.
+                Log.d(TAG, e.localizedMessage?.toString() ?: "Error")
+            }
+    }
 
     private fun workAfterLogin() {
         tokenManager.saveUserExistance()
@@ -134,5 +132,33 @@ class SignUpFragment : Fragment() {
 
     companion object {
         private const val REQ_ONE_TAP = 2
+    }
+
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        workAfterLogin()
+        when (requestCode) {
+            REQ_ONE_TAP -> {
+                try {
+                    val credential = oneTapClient.getSignInCredentialFromIntent(data)
+                    val idToken = credential.googleIdToken
+                    when {
+                        idToken != null -> {
+                            // Got an ID token from Google. Use it to authenticate
+                            // with your backend.
+                            Log.d(TAG, "Got ID token.")
+                        }
+                        else -> {
+                            // Shouldn't happen.
+                            Log.d(TAG, "No ID token!")
+                        }
+                    }
+                } catch (e: ApiException) {
+                    // ...
+                }
+            }
+        }
     }
 }
