@@ -1,8 +1,5 @@
 package com.falcon.notesapp.login
 
-//import com.google.android.gms.auth.api.identity.BeginSignInRequest
-//import com.google.android.gms.auth.api.identity.Identity
-//import com.google.android.gms.auth.api.identity.SignInClient
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues.TAG
@@ -37,7 +34,6 @@ class SignUpFragment : Fragment() {
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
-//    private lateinit var oneTapClient: SignInClient
     @Inject
     lateinit var tokenManager: TokenManager
     override fun onCreateView(
@@ -48,15 +44,12 @@ class SignUpFragment : Fragment() {
         if (tokenManager.doesUserExist()) { // IF ALREADY USER CREATED DIRECTLY REDIRECT HER TO MAIN FRAGMENT
             findNavController().navigate(R.id.action_SignUpFragment_to_mainFragment)
         }
-
         oneTapClient = Identity.getSignInClient(requireContext())
         signUpRequest = BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
                     .setServerClientId(getString(R.string.your_web_client_id))
-                    // Show all accounts on the device.
                     .setFilterByAuthorizedAccounts(false)
                     .build())
             .build()
