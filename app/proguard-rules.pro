@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# Hilt
+-keep class dagger.hilt.internal.** { *; }
+-keep class com.falcon.NoteApplication { *; }
+# Dagger generated code
+-keep class dagger.hilt.** { *; }
